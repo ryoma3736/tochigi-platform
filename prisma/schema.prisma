@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("user") // "user", "business", "admin"
+  companyId     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  companies   Company[]
+}
+
+model Company {
+  id              String          @id @default(cuid())
+  name            String
+  email           String          @unique
+  phone           String
+  category        Category        @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  description     String?
+  address         String
+  instagramHandle String?
+  instagramToken  String?
+  subscriptionPlan String         // "instagram_only" | "platform_full"
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  services        Service[]
+  inquiries       InquiryCompany[]
+  subscription    Subscription?
+  instagramPosts  InstagramPost[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId   String
+  name        String
+  description String
+  priceFrom   Int
+  priceTo     Int?
+  unit        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Inquiry {
+  id            String           @id @default(cuid())
+  customerName  String
+  customerEmail String
+  customerPhone String
+  message       String           @db.Text
+  selectedItems Json
+  status        String           @default("sent")
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  companies     InquiryCompany[]
+}
+
+model InquiryCompany {
+  inquiry   Inquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  inquiryId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  @@id([inquiryId, companyId])
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  company              Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId            String   @unique
+  plan                 String
+  price                Int
+  status               String   @default("active")
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model InstagramPost {
+  id            String   @id @default(cuid())
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId     String
+  postId        String   @unique
+  caption       String?  @db.Text
+  mediaUrl      String
+  mediaType     String
+  permalink     String
+  timestamp     DateTime
+  likesCount    Int      @default(0)
+  commentsCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([companyId, timestamp(sort: Desc)])
+}

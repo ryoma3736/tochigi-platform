@@ -1,0 +1,106 @@
+version: '3.9'
+
+services:
+  # PostgreSQL データベース
+  postgres:
+    image: postgres:16-alpine
+    container_name: tochigi-platform-postgres
+    restart: unless-stopped
+    environment:
+      # データベース設定
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tochigi_platform
+      # PostgreSQL設定
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+      # タイムゾーン設定
+      TZ: Asia/Tokyo
+      PGTZ: Asia/Tokyo
+    ports:
+      # ホストの5432ポートをコンテナの5432にマッピング
+      - "5432:5432"
+    volumes:
+      # データ永続化
+      - postgres_data:/var/lib/postgresql/data
+      # 初期化スクリプト（オプション）
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tochigi_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tochigi-network
+
+  # pgAdmin（データベース管理ツール、オプション）
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: tochigi-platform-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@tochigi-platform.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - tochigi-network
+    profiles:
+      # デフォルトでは起動しない（起動時: docker-compose --profile tools up）
+      - tools
+
+  # Redis（キャッシュ用、オプション）
+  redis:
+    image: redis:7-alpine
+    container_name: tochigi-platform-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tochigi-network
+    profiles:
+      # デフォルトでは起動しない
+      - tools
+
+  # Mailhog（開発用メールサーバー、オプション）
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: tochigi-platform-mailhog
+    restart: unless-stopped
+    ports:
+      # SMTPポート
+      - "1025:1025"
+      # Web UIポート
+      - "8025:8025"
+    networks:
+      - tochigi-network
+    profiles:
+      # デフォルトでは起動しない
+      - tools
+
+# ボリューム定義
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ネットワーク定義
+networks:
+  tochigi-network:
+    driver: bridge
