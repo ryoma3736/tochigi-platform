@@ -1,50 +1,10 @@
 import Link from 'next/link';
 import { InstagramEmbed } from './InstagramEmbed';
-
-interface InstagramPost {
-  id: string;
-  postId: string;
-  caption: string | null;
-  mediaUrl: string;
-  mediaType: string;
-  permalink: string;
-  timestamp: string;
-  likesCount: number;
-  commentsCount: number;
-  company: {
-    id: string;
-    name: string;
-    instagramHandle: string | null;
-    category: {
-      name: string;
-      slug: string;
-    };
-  };
-}
+import { getInstagramPosts, type InstagramPost } from '@/lib/instagram';
 
 interface InstagramFeedProps {
   limit?: number;
   useEmbeds?: boolean;
-}
-
-async function getInstagramPosts(limit: number = 9): Promise<InstagramPost[]> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002';
-    const response = await fetch(`${baseUrl}/api/instagram/feed?limit=${limit}`, {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch Instagram posts:', response.status);
-      return [];
-    }
-
-    const data = await response.json();
-    return data.posts || [];
-  } catch (error) {
-    console.error('Error fetching Instagram posts:', error);
-    return [];
-  }
 }
 
 export async function InstagramFeed({ limit = 9, useEmbeds = true }: InstagramFeedProps) {
