@@ -14,11 +14,26 @@ interface Category {
   }
 }
 
+interface CategoryGroup {
+  name: string
+  icon: string
+  categoryCount: number
+  companyCount: number
+  categories: string[]
+}
+
 const groupIcons: { [key: string]: string } = {
   '住宅内部': '🏠',
   '住宅外部': '🏗️',
   '設備・インフラ': '⚙️',
   'その他専門': '🔧',
+}
+
+const groupDescriptions: { [key: string]: string } = {
+  '住宅内部': '内装・大工・建具など',
+  '住宅外部': '外壁・塗装・屋根など',
+  '設備・インフラ': '設備・電気・基礎など',
+  'その他専門': '解体・補修・クリーニング',
 }
 
 // モックデータ（データベース未接続時のフォールバック）
@@ -58,7 +73,6 @@ export function CategorySection() {
         }
       } catch (error) {
         console.error('Failed to fetch categories, using mock data:', error)
-        // モックデータを使用
         setCategories(mockCategories)
       } finally {
         setLoading(false)
@@ -68,40 +82,61 @@ export function CategorySection() {
     fetchCategories()
   }, [])
 
+  // グループごとに集計
+  const groups: CategoryGroup[] = Object.keys(groupIcons).map((groupName) => {
+    const groupCategories = categories.filter((cat) => cat.group === groupName)
+    const companyCount = groupCategories.reduce(
+      (sum, cat) => sum + (cat._count?.companies || 0),
+      0
+    )
+    return {
+      name: groupName,
+      icon: groupIcons[groupName],
+      categoryCount: groupCategories.length,
+      companyCount,
+      categories: groupCategories.map((cat) => cat.name),
+    }
+  })
+
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[...Array(18)].map((_, i) => (
-          <div key={i} className="h-32 bg-gray-200 animate-pulse rounded-lg" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-48 bg-gray-200 animate-pulse rounded-lg" />
         ))}
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {categories.map((category) => {
-        const icon = category.group ? groupIcons[category.group] : '📁'
-        return (
-          <Link
-            key={category.id}
-            href={`/companies?category=${category.slug}`}
-            className="group"
-          >
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                  {icon}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {groups.map((group) => (
+        <Link
+          key={group.name}
+          href={`/companies?group=${encodeURIComponent(group.name)}`}
+          className="group"
+        >
+          <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer h-full hover:scale-105">
+            <CardContent className="p-8 text-center">
+              <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
+                {group.icon}
+              </div>
+              <h3 className="font-bold text-xl mb-2">{group.name}</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {groupDescriptions[group.name]}
+              </p>
+              <div className="flex justify-center gap-4 text-sm">
+                <div className="text-primary font-semibold">
+                  {group.categoryCount}種類
                 </div>
-                <div className="font-semibold mb-1 text-sm">{category.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {category._count?.companies || 0}業者
+                <div className="text-muted-foreground">
+                  {group.companyCount}業者
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
-        )
-      })}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
     </div>
   )
 }
