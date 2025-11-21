@@ -7,35 +7,43 @@ async function main() {
 
   // カテゴリーデータの作成
   console.log('📁 Creating categories...')
-  const categories = await Promise.all([
-    prisma.category.upsert({
-      where: { slug: 'construction' },
-      update: {},
-      create: {
-        name: '建設業',
-        slug: 'construction',
-        description: '建設・リフォーム・外構工事など',
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: 'restaurant' },
-      update: {},
-      create: {
-        name: '飲食業',
-        slug: 'restaurant',
-        description: 'レストラン・カフェ・居酒屋など',
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: 'retail' },
-      update: {},
-      create: {
-        name: '小売業',
-        slug: 'retail',
-        description: '小売店・専門店・物販など',
-      },
-    }),
-  ])
+  const categoryData = [
+    // 🏠 住宅内部の工事
+    { name: '内装工事', slug: 'interior-work', description: '住宅・店舗の内装リフォーム、クロス張替え、床材工事など', group: '住宅内部' },
+    { name: '大工工事', slug: 'carpentry-work', description: '新築木造住宅、リフォーム、造作工事など', group: '住宅内部' },
+    { name: '建具工事', slug: 'joinery-work', description: 'ドア・窓・ふすまの取付・交換、建具製作など', group: '住宅内部' },
+    { name: '家具工事', slug: 'furniture-work', description: '造り付け家具、オーダーメイド家具、収納家具など', group: '住宅内部' },
+    { name: 'インテリア工事', slug: 'interior-design-work', description: 'インテリアデザイン、コーディネート、装飾工事など', group: '住宅内部' },
+    { name: 'ガラス工事', slug: 'glass-work', description: '窓ガラス交換、サッシ取付、防犯ガラス設置など', group: '住宅内部' },
+
+    // 🏗️ 住宅外部の工事
+    { name: '外壁工事', slug: 'exterior-wall-work', description: '外壁張替え、サイディング工事、タイル工事など', group: '住宅外部' },
+    { name: '塗装工事', slug: 'painting-work', description: '外壁塗装、屋根塗装、防水塗装など', group: '住宅外部' },
+    { name: '屋根工事', slug: 'roofing-work', description: '屋根葺き替え、雨漏り修理、屋根リフォームなど', group: '住宅外部' },
+    { name: '防水工事', slug: 'waterproofing-work', description: 'ベランダ防水、屋上防水、雨漏り防止工事など', group: '住宅外部' },
+    { name: '外構工事', slug: 'exterior-work', description: '庭づくり、駐車場工事、フェンス設置、エクステリアなど', group: '住宅外部' },
+
+    // ⚙️ 設備・インフラ工事
+    { name: '設備工事', slug: 'equipment-work', description: '給排水設備、空調設備、衛生設備の設置・修理など', group: '設備・インフラ' },
+    { name: '電気工事', slug: 'electrical-work', description: '電気配線、照明工事、電気設備の保守・点検など', group: '設備・インフラ' },
+    { name: '基礎工事', slug: 'foundation-work', description: '住宅基礎、土間コンクリート、基礎補修など', group: '設備・インフラ' },
+    { name: '土木工事', slug: 'civil-engineering-work', description: '造成工事、擁壁工事、道路工事、上下水道工事など', group: '設備・インフラ' },
+
+    // 🔧 その他専門工事
+    { name: '解体工事', slug: 'demolition-work', description: '建物解体、内装解体、産業廃棄物処理など', group: 'その他専門' },
+    { name: '補修工事', slug: 'repair-work', description: '外壁補修、床補修、建物メンテナンスなど', group: 'その他専門' },
+    { name: 'クリーニング工事', slug: 'cleaning-work', description: 'ハウスクリーニング、店舗清掃、エアコン洗浄など', group: 'その他専門' },
+  ]
+
+  const categories = await Promise.all(
+    categoryData.map(category =>
+      prisma.category.upsert({
+        where: { slug: category.slug },
+        update: {},
+        create: category,
+      })
+    )
+  )
 
   console.log(`✅ Created ${categories.length} categories`)
 

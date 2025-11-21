@@ -63,6 +63,7 @@ model Category {
   name        String    @unique
   slug        String    @unique
   description String?
+  group       String?   // カテゴリーグループ (住宅内部, 住宅外部, 設備・インフラ, その他専門)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   companies   Company[]

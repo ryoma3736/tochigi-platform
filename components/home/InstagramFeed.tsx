@@ -29,9 +29,10 @@ interface InstagramFeedProps {
 
 async function getInstagramPosts(limit: number = 9): Promise<InstagramPost[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3005';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/instagram/feed?limit=${limit}`, {
-      cache: 'no-store'
+      cache: 'no-store',
+      next: { revalidate: 0 }
     });
 
     if (!response.ok) {

@@ -1,17 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { InstagramFeed } from "@/components/home/InstagramFeed";
+import { InstagramFeedClient } from "@/components/home/InstagramFeedClient";
+import { CategorySection } from "@/components/home/CategorySection";
 import Link from "next/link";
 
 export default function HomePage() {
-  const categories = [
-    { name: "リフォーム", count: 45, icon: "🏠" },
-    { name: "造園", count: 32, icon: "🌳" },
-    { name: "外構", count: 28, icon: "🏗️" },
-    { name: "塗装", count: 38, icon: "🎨" },
-    { name: "水回り", count: 41, icon: "💧" },
-    { name: "その他", count: 15, icon: "🔧" },
-  ];
 
   const features = [
     {
@@ -83,27 +76,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-12">
             カテゴリーから探す
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((category) => (
-              <Link
-                key={category.name}
-                href={`/companies?category=${category.name}`}
-                className="group"
-              >
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                      {category.icon}
-                    </div>
-                    <div className="font-semibold mb-1">{category.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {category.count}業者
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          <CategorySection />
         </div>
       </section>
 
@@ -119,7 +92,7 @@ export default function HomePage() {
               施工事例や日々の様子をご覧いただけます。
             </p>
           </div>
-          <InstagramFeed limit={9} />
+          <InstagramFeedClient limit={9} useEmbeds={false} />
         </div>
       </section>
 
