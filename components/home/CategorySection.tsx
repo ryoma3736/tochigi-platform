@@ -19,7 +19,7 @@ interface CategoryGroup {
   icon: string
   categoryCount: number
   companyCount: number
-  categories: string[]
+  categories: Category[]
 }
 
 const groupIcons: { [key: string]: string } = {
@@ -61,6 +61,7 @@ const mockCategories: Category[] = [
 export function CategorySection() {
   const [categories, setCategories] = useState<Category[]>(mockCategories)
   const [loading, setLoading] = useState(true)
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -94,7 +95,7 @@ export function CategorySection() {
       icon: groupIcons[groupName],
       categoryCount: groupCategories.length,
       companyCount,
-      categories: groupCategories.map((cat) => cat.name),
+      categories: groupCategories,
     }
   })
 
@@ -109,33 +110,59 @@ export function CategorySection() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-4">
       {groups.map((group) => (
-        <Link
-          key={group.name}
-          href={`/companies?group=${encodeURIComponent(group.name)}`}
-          className="group"
-        >
-          <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer h-full hover:scale-105">
-            <CardContent className="p-8 text-center">
-              <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
-                {group.icon}
+        <div key={group.name} className="border rounded-lg overflow-hidden">
+          {/* グループヘッダー */}
+          <button
+            onClick={() => setExpandedGroup(expandedGroup === group.name ? null : group.name)}
+            className="w-full flex items-center justify-between p-6 bg-card hover:bg-accent/50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-4xl">{group.icon}</span>
+              <div className="text-left">
+                <h3 className="font-bold text-xl">{group.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {group.categoryCount}種類 • {group.companyCount}業者
+                </p>
               </div>
-              <h3 className="font-bold text-xl mb-2">{group.name}</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {groupDescriptions[group.name]}
-              </p>
-              <div className="flex justify-center gap-4 text-sm">
-                <div className="text-primary font-semibold">
-                  {group.categoryCount}種類
-                </div>
-                <div className="text-muted-foreground">
-                  {group.companyCount}業者
-                </div>
+            </div>
+            <svg
+              className={`w-6 h-6 transition-transform ${
+                expandedGroup === group.name ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* 展開コンテンツ */}
+          {expandedGroup === group.name && (
+            <div className="p-6 bg-muted/30 border-t">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {group.categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/companies?category=${category.slug}`}
+                    className="block"
+                  >
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                      <CardContent className="p-4">
+                        <div className="font-medium text-sm mb-1">{category.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {category._count?.companies || 0}業者
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </Link>
+            </div>
+          )}
+        </div>
       ))}
     </div>
   )
