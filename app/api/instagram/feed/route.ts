@@ -11,7 +11,7 @@ const MOCK_INSTAGRAM_POSTS = [
     id: '1',
     postId: 'DOyPwfOE5L2',
     caption: '【和と洋が調和する、理想のくつろぎ空間】光が差し込むリビングは、木目調のアクセントウォールと無垢材の床が温かい雰囲気を演出。テレビ下のフロートシェルフは、空間を広く見せるだけでなく、お掃除も楽ちんです。隣の和室には、畳の下に引き出し収納を完備。#栄匠 #リフォーム #栃木県 #鹿沼市',
-    mediaUrl: 'https://scontent-nrt1-2.cdninstagram.com/v/t51.82787-15/550920489_18384381382132241_690134743529862613_n.jpg?stp=c234.0.702.702a_dst-jpg_e35_s640x640_tt6&_nc_cat=110&ccb=1-7&_nc_sid=18de74&_nc_ohc=cCIaBo8a89sQ7kNvwFGzbrD&_nc_oc=Adm_neiFEO2Au1Lgzq8m1bInbzzLSoUI_s2erFqsL2Dsmsz61fQOk15W7y5wNUQ5Hu6gU--SZVZwc4Nmue_t_3F-&_nc_zt=23&_nc_ht=scontent-nrt1-2.cdninstagram.com&oh=00_AfjiH3HnGbmr6X-iPcL14tErn0Gyr6QsvHtlxxC_aFMcXg&oe=6920EA2C',
+    mediaUrl: 'https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=800&h=800&fit=crop&q=80',
     mediaType: 'IMAGE',
     permalink: 'https://www.instagram.com/p/DOyPwfOE5L2/',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
