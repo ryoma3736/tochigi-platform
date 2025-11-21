@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { InstagramFeedClient } from "@/components/home/InstagramFeedClient";
+import { InstagramFeed } from "@/components/home/InstagramFeed";
 import { CategorySection } from "@/components/home/CategorySection";
 import Link from "next/link";
 
@@ -92,7 +92,7 @@ export default function HomePage() {
               施工事例や日々の様子をご覧いただけます。
             </p>
           </div>
-          <InstagramFeedClient limit={9} useEmbeds={false} />
+          <InstagramFeed limit={9} />
         </div>
       </section>
 
