@@ -19,8 +19,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts           Account[]
+  sessions           Session[]
+  inquiryResponses   InquiryResponse[]
+  posts              Post[]
+  comments           Comment[]
+  postLikes          PostLike[]
 }
 
 model Account {
@@ -112,10 +116,30 @@ model Inquiry {
   customerPhone String
   message       String           @db.Text
   selectedItems Json
-  status        String           @default("sent")
+  status        InquiryStatus    @default(PENDING)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   companies     InquiryCompany[]
+  responses     InquiryResponse[]
+}
+
+enum InquiryStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+}
+
+model InquiryResponse {
+  id          String   @id @default(cuid())
+  inquiryId   String
+  content     String   @db.Text
+  responderId String
+  createdAt   DateTime @default(now())
+
+  inquiry   Inquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  responder User    @relation(fields: [responderId], references: [id])
+
+  @@index([inquiryId])
 }
 
 model InquiryCompany {
@@ -157,4 +181,46 @@ model InstagramPost {
   createdAt     DateTime @default(now())
 
   @@index([companyId, timestamp(sort: Desc)])
+}
+
+model Post {
+  id        String     @id @default(cuid())
+  title     String
+  content   String     @db.Text
+  authorId  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     PostLike[]
+
+  @@index([authorId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  postId    String
+  authorId  String
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([authorId])
+}
+
+model PostLike {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }

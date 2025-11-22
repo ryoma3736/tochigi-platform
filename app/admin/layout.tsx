@@ -33,6 +33,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 売上レポート
               </Link>
+              <Link
+                href="/admin/inquiries"
+                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                問い合わせ
+              </Link>
             </nav>
           </div>
         </div>
